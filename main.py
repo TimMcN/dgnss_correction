@@ -12,9 +12,6 @@ def arguments():
     return parser.parse_args()
 args = arguments()
 
-def corrections():
-    o#corrections
-
 #Covnert SBF to rinex
 os.system("./teqc -sep sbf %s > %s" %(args.rover_in, args.rover_in+".rinex"))
 rover_rinex = args.rover_in+".rinex"
@@ -22,8 +19,8 @@ rover_rinex = args.rover_in+".rinex"
 #Read in Rinex header & data
 rover_header, rover_data = gpstk.readRinex3Obs(rover_rinex, strict=True)
 base_stn_loc = "base_stn/"+ args.base_stn
-base_stn_head, base_stn_data = gpstk.readRinex3Obs (base_stn_loc, strict=True)
+base_stn_head, base_stn_data = gpstk.readRinex3Obs (base_stn_loc+".18o", strict=True)
 
 #Get first and last GPS entry from rover
-os.system("app/rnx2rtkp/gcc/rnx2rtkp %s %s -c on -o %s.pos"
-            %(rover_rinex, base_stn_loc, rover_in))
+os.system("app/rnx2rtkp/gcc/rnx2rtkp %s %s* -c on -o %s.pos"
+            %(rover_rinex, base_stn_loc, args.rover_in))
