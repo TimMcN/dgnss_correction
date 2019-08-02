@@ -1,5 +1,3 @@
-import gpstk
-from matplotlib.pyplot import figure,show
 import os
 import argparse
 
@@ -15,10 +13,8 @@ args = arguments()
 #Covnert SBF to rinex
 os.system("./teqc -sep sbf %s > %s" %(args.rover_in, args.rover_in+".rinex"))
 rover_rinex = args.rover_in+".rinex"
-#Read in Rinex header & data
-rover_header, rover_data = gpstk.readRinex3Obs(rover_rinex, strict=True)
+#Read in Rinex header & data for rover & base station
 base_stn_loc = args.base_stn
-base_stn_head, base_stn_data = gpstk.readRinex3Obs (base_stn_loc, strict=True)
 #Perform DGNSS corrections and output to POS file
-os.system("app/rnx2rtkp/gcc/rnx2rtkp %s %s -c on -o %s"
-            %(rover_rinex.split("."[0]+".pos"), base_stn_loc.split(".")[0]+"*", args.rover_in))
+os.system("app/rnx2rtkp/gcc/rnx2rtkp %s %s -c on -o %s.pos"
+            %(rover_rinex, base_stn_loc.split(".")[0]+"*", args.rover_in.split("."[0]+".pos")))
