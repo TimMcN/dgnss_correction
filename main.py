@@ -1,30 +1,29 @@
-from __future__ import print_function
-from matplotlib.pyplot import figure, show
 import gpstk
+from matplotlib.pyplot import figure,show
+import os
+import argparse
 
-rfn = 'ath1193x.19o'
-header, data = gpstk.readRinex3Obs(rfn)
-print(header)
+def arguments():
+    parser = argparse.ArgumentParser(description='DGNSS Corrector')
+    parser.add_argument('--rover_in', type=str, default="",
+                        help = "Rover SBF Path")
+    parser.add_argument('--base_stn', type=str, default="",
+                        help = "Base STN Rinex Path")
+    return parser.parse_args()
+args = arguments()
 
-oem = gpstk.ObsEpochMap()
-for d in data:
-        print(gpstk.CivilTime(d.time))
-        oe = gpstk.ObsEpoch()
-        oe.time = d.time
-        for sv in list (d.obs.keys()):
-            print (sv, end=' ')
-            epoch = d.obs[sv]
-            soe = gpstk.SvObsEpoch()
-            soe.svid = sv
-            for i in range(len(epoch)):
-                rinex2_obs_type = header.R2ObsTypes[i]
-                oid = header.mapObsTypes['G'][i]
-                print("{}({})={}".format(oid,rinex2_obs_type, epoch[i].data), end=' ')
-                loc = epoch[i].data
-                soe[oid] = epoch[i].data
-            oe[sv] = soe
-            print()
-            oem[d.time]=oe
+def corrections():
+    o#corrections
 
+#Covnert SBF to rinex
+os.system("./teqc -sep sbf %s > %s" %(args.rover_in, args.rover_in+".rinex"))
+rover_rinex = args.rover_in+".rinex"
+#print(rover_rinex)
+#Read in Rinex header & data
+rover_header, rover_data = gpstk.readRinex3Obs(rover_rinex, strict=True)
+base_stn_loc = "base_stn/"+ args.base_stn
+base_stn_head, base_stn_data = gpstk.readRinex3Obs (base_stn_loc, strict=True)
 
-gpstk.writeRinex3Obs(rfn + '.new', header, data)
+#Get first and last GPS entry from rover
+os.system("app/rnx2rtkp/gcc/rnx2rtkp %s %s -c on -o %s.pos"
+            %(rover_rinex, base_stn_loc, rover_in))
